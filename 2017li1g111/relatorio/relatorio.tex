@@ -1,0 +1,892 @@
+\documentclass[a4paper]{report} % estilo do documento
+
+\usepackage[utf8]{inputenc} %encoding do ficheiro
+\usepackage[portuges]{babel} % para língua portuguesa
+\usepackage{graphicx} % para importar imagens
+\usepackage{url}
+
+\begin{document}
+
+\title{Relatório Trabalho Prático LI1}
+\author{Grupo 111\\
+\\
+Gonçalo Esteves
+\\a85731}
+\date{\today}
+
+\maketitle
+
+\tableofcontents
+
+
+
+
+
+%% Introdução
+\chapter{Introdução}
+
+
+
+  \section{Contextualização}
+  
+  No âmbito da Unidade Curricular de Laboratórios de Informática 1, foi-nos solicitada a recriação, em \textit{Haskell}, de uma versão um pouco mais simplificada do jogo \textbf{\textit{Micro Machines}},  desenvolvido originalmente pela criadora de jogos inglesa \textbf{Codemasters}.
+  É de realçar que a origem do jogo se baseia na famosa linha de brinquedos \textit{Micro Machines: The Original Scale Miniatures}, criada pela empresa americana \textbf{Galoob} (atualmente parte da multinacional \textbf{Hasbro}). Esta consistia, principalmente, em miniaturas de carros reais, havendo, no entanto, também algumas pistas de corrida. Outra curiosidade é o facto de que, na série original de videojogos, os principais cenários consistiam em ambientes presenciados numa casa, nomeadamente, secretárias e mesas de cozinha, que potenciavam a criação de diversas dinâmicas de jogo, como o despiste e consequente queda dos carros. Para além disto, havia também diversos objetos do quotidiano que eram representados como obstáculos, tornando, assim, o jogo mais desafiante e engraçado.
+  
+  \hspace{1cm}
+  
+  \par \noindent O jogo original, lançado em 1991, foi criado em perspetiva \textit{top-down} (que se manteve em muitas das versões seguintes) e, como referido em cima, tinha por base um tema pouco habitual: o ambiente de uma casa. Como tal, algumas pistas eram, por exemplo, mesas de bilhar, secretárias e até mesmo casas de árvore e jardins. O mesmo possuia uma dinâmica tal que, quando um jogador se afastava demasiado do percurso, este "morria" e era enviado de volta para a pista. 
+  
+  \hspace{1cm}
+  
+  \par \noindent Havia dois tipos de jogo: \textbf{The Micro Machines Challenge} e \textbf{Head-to-Head}. No primeiro, o jogador disputa uma série de corridas contra três \textit{bots}, nas quais deve terminar como primeiro ou segundo classificado de forma a qualificar-se para a seguinte prova. Havia um número de vidas base (3) que era reduzido sempre que o jogador não cumpria o objetivo. Este, por outro lado, podia ganhar uma vida extra de três em três corridas, caso conseguisse vencer uma corrida em contra-relógio. O jogo acabava quando todas as vidas eram perdidas. O segundo modo processa-se de forma bastante diferente. Este era disputado apenas contra um oponente, sendo que cada jogador estava associado a uma cor distinta. O objetivo deste modo de jogo era fazer com que o maior número de luzes (representadas no ecrã) fosse da cor do seu jogador. Uma luz tornar-se-ia da cor do jogador quanto este estivesse a um "ecrã de distância" do outro jogador, ou seja, quando o mesmo não fosse visível no ecrã do seu adversário, estando à frente da corrida. O jogo acabava quando todas as oito luzes eram da mesma cor ou depois de três voltas completas à pista. Neste caso, venceria o jogador cuja cor estivesse representada em maior número nas luzes do ecrã. Se houvesse empate, haveria um corrida de morte súbita, em que venceria aquele que obtivesse primeiro uma luz. O jogo inicia com quatro luzes de cada cor e podia ser jogado contra um \textit{bot} ou contra outra pessoa.
+  
+  \hspace{1cm}
+  
+  \par \noindent As versões mais recentes demonstram uma série de variações, como o aumento do número possível de jogadores, diferentes tipos de veículos (carros de guerra, helicópteros, \textit{hovercrafts}, entre outros) e até mesmo a inserção de armas, usadas para atacar outros jogadores.
+  
+  \newpage
+  
+  \section{Objetivos}
+  
+  A realização do projeto foi dividida em duas fases, cada uma delas detentora de três tarefas, de modo a facilitar a elaboração do trabalho. Cada uma das tarefas está associada a um objetivo diferente, contribuindo todas elas para o objetivo principal do projeto: a criação de um jogo de corridas, tendo por base o \textit{Micro Machines}.
+  
+  \hspace{1cm}
+
+  \par \noindent Nesta nossa versão, considera-se que:
+  
+  \begin{itemize}
+  
+  \item quando um carro sai da pista, cai na lava, morrendo e voltando depois para a pista;
+  \item quando um carro cai de uma peça mais alta para outra com altura inferior (sem descer uma rampa), ele também morre, voltando, pouco tempo depois, para a pista;
+  \item quando um carro embate com uma peça de altura superior, este faz ricochete (neste caso, apenas muda a direção da força aplicada, somando-lhe 180 graus);
+  \item não é considerada a força aplicada num carro quando outro embate nele;
+  \item existe nitro (cada jogador possui uma determinada quantidade de nitro, sendo esta reduzida quando ele é ativado), que pode ser aplicado em todos os carros (o jogador escolhe o carro em que quer aplicar o nitro - nele próprio, caso lhe seja favorável, ou noutro carro, de modo a prejudicá-lo ou, quem sabe, talvez ajudá-lo, caso estejam a jogar em equipas);
+   
+  \end{itemize}
+  
+  \hspace{1cm}
+  
+  \par \noindent Assim sendo, tenciona-se contruir um jogo cuja pista poderá possuir retas simples, em todas as direções; rampas, tanto ascendentes como descendentes, em qualquer direção; e curvas, tanto à esqueda como à direita, em qualquer direção. Deste modo, tudo o que não for uma das peças anteriores deve ser considerado como lava. Para além disto, tem de se tornar os carros capazes de dar uma volta à pista, tendo, assim, os carros de possuir a capacidade de acelerar, travar, virar à esquerda e à direita,bem como ativar o nitro, à medida que o jogo vai correndo e os jogadores vão dando ordens.
+ 
+
+
+
+
+%% Análise de Requisitos e Especificação do Problema
+\chapter{Análise de Requisitos}
+
+
+
+  \section{1ª Fase}
+  \label{sec:analisefase1}
+
+  Na 1ªFase, nomeadamente na Tarefa 1, é pedido que se elabore um conjunto de funções capazes de gerar um mapa a partir de um caminho, considerando-se este como sendo um conjunto de passos. O tabuleiro do mapa comeca a ser formado a partir da posição inicial ideal (determinada através da função \textit{partida}, pré-definida nos módulos fornecidos pelos docentes), sendo \textit{Este} a direção inicial e \textit{0} a altura. A partir destes pressupostos, deve-se formar um trajeto com os diferentes tipos de peças que dados, devendo todas as peças que não fazem parte do percurso ser do tipo \textit{Lava}. Assim, pode-se afirmar que o principal objetivo desta tarefa é definir a função seguinte:
+
+  \begin{verbatim}
+   
+    constroi :: Caminho -> Mapa
+
+  \end{verbatim}
+
+  \par \noindent De seguinda, na Tarefa 2, dá-se a informação de que é necessária a criação de um sistema de validação de mapas, que diga se um determinado mapa é ou não válido para o tipo de jogo que queremos construir. Para tal ser concluído, é necessário que o mapa cumpra uma série de requisitos, que devem ser a base das funções definidas. Assim sendo, requere-se a definição da função abaixo:
+
+  \begin{verbatim}
+    
+    valida :: Mapa -> Bool 
+    
+  \end{verbatim}
+  
+  \par \noindent Por fim, o término desta fase é marcado pela Tarefa 3, onde se pretende começar a implementar as mecânicas de jogo, incidindo, mais precisamente, nas movimentações do carro e nas suas eventuais colisões. Para tal, é necessário determinar qual a movimentação que um carro irá efetuar num dado intervalo de tempo, analisando tudo aquilo que pode ocorrer durante o mesmo, nomeadamente, as transições entre peças. Através destas, conclui-se se o carro morrerá ou não e, se sobreviver, determina-se qual a sua próxima posição. Deste modo, pretende-se criar a seguinte função: 
+
+  \begin{verbatim}
+    
+    movimenta :: Tabuleiro -> Tempo -> Carro -> Maybe Carro
+    
+  \end{verbatim}
+
+  \par \noindent Em suma, os objetivos da 1ªFase podem ser resumidos a: criação de um mapa de jogo, a partir de um conjunto de passos; validação de mapas, de modo a determinar se são jogáveis ou não; e movimentação de um carro, verificando se este sobrevive ou não, e, caso tal aconteça, qual a sua próxima posição.
+
+  \section{2ªFase}
+  \label{sec:analisefasee}
+
+  Na 2ªFase (Tarefa 4,5 e 6), o primeiro objetivo, definido na Tarefa 4, é o da construção de funções que permitam que um jogo seja atualizado. Isto acontece quando se modifica o estado de um dado carro, alterando a sua velocidade ou direção, consoante a ação tomada (existem cinco tipos diferentes de ações: acelerar, travar, virar à esquerda, virar à direita e ligar o nitro). Para tal, pretende-se definir a função que se segue:
+
+  \begin{verbatim}
+
+    atualiza :: Tempo -> Jogo -> Int -> Acao -> Jogo
+    
+  \end{verbatim}
+
+  \par \noindent Na Tarefa 5, pretende-se, primariamente, combinar as Tarefas 3 e 4, de modo a que o estado do jogo seja atualizado num dado intervalo de tempo. Assim sendo, deve-se usar as funções \textit{movimenta} (Tarefa 3) e \textit{atualiza} (Tarefa 4) para construir uma função que modifique as características dos carros, consoante as ações que estão a tomar. Como tal, tenciona-se definir a seguinte função:
+
+  \begin{verbatim}
+
+    atualizaMovimenta :: Tempo -> Jogo -> [Acao] -> Jogo
+    
+  \end{verbatim}
+  
+  \par \noindent Para além disto, pretende-se construir a parte visual e interativa do jogo: as interações que o jogador estabelece com o computador e, consequentemente, com o que acontece no ecrã. Deste modo, pretende-se definir a função \textit{main = IO ()}.
+  
+  \hspace{1cm}
+
+  \par \noindent Para terminar tanto esta 2ªFase como todo o trabalho, na Tarefa 6 proceder-se-á à criação de um \textit{bot} que, perante uma situação de jogo, tomará a melhor decisão, de modo a fazer com que o carro complete uma volta à pista o mais rápido possível. Para isto, ter-se-á em conta as características do jogo, de modo a elaborar uma estratégia que lhe permita sair vencedor de qualquer mapa. Assim, esta última tarefa requererá a construção da seguinte função:
+
+  \begin{verbatim}
+
+    bot :: Tempo -> Jogo -> Int -> Acao
+    
+  \end{verbatim}
+
+
+
+
+
+%% Descrição da Solução Desenvolvida
+\chapter{A Nossa Solução}
+\label{sec:solucao}
+
+  \par \noindent De modo a resolver os problemas levantados nas tarefas, e tendo em vista os objetivos traçados nestas, desenvolveram-se diversas funções que definem uma proposta de solução.
+
+  \section{Tarefa 1}
+
+  \par \noindent Para atingir o primeiro objetivo, proposto na Tarefa 1, o grupo começou por desenvolver uma função que, dada a dimensão ideal de um eventual mapa de um caminho, constrói um tabuleiro só com peças do tipo \textit{Lava} e com essa dimensão. 
+
+  \begin{verbatim}
+    
+    constroiLava :: Dimensao -> Tabuleiro
+    
+  \end{verbatim}
+
+  \par \noindent Em seguida, programou-se uma função que, usando um caminho e sabendo a sua posição e direção iniciais, devolve uma lista de posições. Esta função começa por pegar no primeiro passo, juntamente com a sua orientação, e associá-los à sua posição. Depois, dependendo do passo e da orientação, irá prever qual será a próxima posição e se a orientação se altera. Por fim, cria uma lista em que a posição inicial será a cabeça e a cauda será determinada pela nossa função, à qual, agora, os argumentos dados são o caminho (sem o primeiro passo), a posição seguinte e a nova orientação atualizada (caso não se altere, mantém-se a original).
+
+  \begin{verbatim}
+    
+    posicoes :: Caminho -> [Posicao]
+    posicoes c = posicoesAux c (partida c) Este
+    
+    posicoesAux :: Caminho -> Posicao -> Orientacao -> [Posicao]
+    
+  \end{verbatim}
+  
+  \newpage
+
+  \par \noindent Seguidamente, foi criada uma função que, dada a direção inicial, o caminho e a altura inicial do percurso, devolve uma lista de peças. Esta função associa todos os seus argumentos, fazendo um passo depender da sua orientação para determinar o tipo da peça, sendo a altura da peça a mesma que a dada. Além disto, a função determina se alguma das características (orientação e altura) é alterada depois de se executar o passo (por exemplo, a altura poderia aumentar caso se estivesse a subir uma rampa, ou a orientação poderia ser alterada, caso se fizesse uma curva).
+
+  \begin{verbatim}
+    
+    pecasFinais :: Orientacao -> Caminho -> Altura -> [Peca]
+    
+  \end{verbatim}
+
+  \par \noindent Por fim, foi definida uma última função que, dado um mapa, uma lista de posições e uma lista de peças, devolve um tabuleiro com as novas peças. Ou seja, a função relaciona as posições com a sua peça respetiva (1ªposição com a 1ªpeça, 2ªposição com a 2ªpeça,...), de modo a inserir todas as peças novas no tabuleiro, na respetiva posição, substituindo as originais pelas novas.
+
+  \begin{verbatim}
+    
+    substituiTodas :: Tabuleiro -> [Posicao] -> [Peca] 
+                                             -> Tabuleiro
+    
+  \end{verbatim}
+
+  \par \noindent Deste modo, a função \textit{constroi} define-se da seguinte forma:
+
+  \begin{verbatim}
+
+    constroi c = 
+         Mapa ((partida c),dirInit) 
+              (substituiTodas (constroiLava (dimensao c)) 
+                              (posicoes c)
+                              (pecasFinais dirInit c altInit))
+
+  \end{verbatim}
+
+  \par \noindent Assim, a nossa função fica definida de modo a que, recebendo um caminho "c", o tabuleiro do mapa correspondente seja definido através de um tabuleiro inicial só de lavas, no qual são inseridas peças específicas, correspondentes aos passos do caminho, nas suas respetivas posições.
+  
+  \newpage
+
+  \section{Tarefa 2}
+
+  \par \noindent Na Tarefa 2, somos desafiados a encontrar um método para verificar se um mapa é válido. Para começar, definiu-se uma função que, dado um mapa, verifica se o tabuleiro deste é retangular, ou seja, se todas as linhas do tabuleiro possuem o mesmo número de peças. Inicialmente, a função compara o comprimento da primeira linha do tabuleiro (primeira lista de peças do tabuleiro) com o comprimento da segunda linha deste (segunda lista do peças do tabuleiro). Se estes forem iguais, então a função continua recursivamente, agora sem a primeira linha do tabuleiro. Caso contrário, a função declara logo o tabuleiro como não sendo retangular.
+
+  \begin{verbatim}
+    
+    verRetangular :: Mapa -> Bool
+    
+  \end{verbatim}
+
+  \par \noindent Em seguida, criou-se uma função que verifica se a primeira e última linhas do tabuleiro de um mapa são compostas apenas por lava. Para tal, a função verifica se todas as peças da primeira lista do tabuleiro são \textit{Peca Lava 0}. Confirmando-se isto, a função averigua se a última lista do tabuleiro também é composta apenas por \textit{Peca Lava 0}. Caso pelo menos uma das listas não obedeça à condição, o mapa é considerado inválido.
+
+  \begin{verbatim}
+    
+    verLinhas :: Mapa -> Bool
+    
+  \end{verbatim}
+
+  \par Posteriormente, elaborou-se uma função que permite descobrir se um mapa possui colunas só com peças de lava. Como tal, a função recebe um mapa e vai verificar se o primeiro e o último elementos de todas as suas listas (linhas de peças) são \textit{Peca Lava 0}. Se isto se verificar, então o mapa é considerado válido para este teste. Caso contrário, o mapa é dado como sendo inapropriado.
+
+  \begin{verbatim}
+    
+    verColunas :: Mapa -> Bool
+    
+  \end{verbatim}
+
+  \par \noindent Prosseguindo na tarefa, programou-se uma função que verifica se uma dada peça pode ser a primeira do percurso. Por outras palavras, a função descobre qual a peça inicial e verifica se esta pode ser atravessada com orientação (\textit{Este}) (orientação inicial). Caso não seja possível, o mapa é dado como inválido.
+
+  \begin{verbatim}
+    
+    verPeca :: Mapa -> Bool
+    
+  \end{verbatim}
+  
+  \newpage
+
+  \par \noindent Continuando com a validação, construiu-se uma função que, dado um mapa, verifica se todas as peças do tipo lava possuem altura 0. Esta função irá percorrer, inicialmente, a primeira lista do tabuleiro e verificar se todas as peças do tipo lava da lista possuem altura igual a 0. Em caso afirmativo, passa para a pŕoxima lista, aplicando o mesmo raciocínio. Em caso negativo, a função declara o mapa como sendo inválido.
+
+  \begin{verbatim}
+    
+    altLavaNula :: [Peca] -> Bool
+    
+  \end{verbatim}
+
+  \par \noindent Em seguida, definiu-se uma função auxiliar que, dada uma posição e um tabuleiro, devolve a peça correspondente.
+
+  \begin{verbatim}
+    
+    pegaPeca :: Posicao -> Tabuleiro -> Peca
+    
+  \end{verbatim}
+
+  \par \noindent Depois, foi necessário definir-se uma função que recebe um par peça/orientação, uma posição e um tabuleiro e dá-nos uma lista de pares peça/orientação, para poder analisar duas situações de validação do mapa. Para tal, esta conta com a ajuda de uma função auxiliar, que recebe o mesmo par peça/orientação, um novo par posição/orientação, a posição, o tabuleiro e uma lista de pares peça/orientação, dando-nos uma lista de pares peça/orientação. Para a relação funcionar direito, as funções estão definidas da seguinte maneira:
+
+  \begin{verbatim}
+
+pecasOrientadas :: (Peca,Orientacao) -> Posicao 
+                -> Tabuleiro -> [(Peca,Orientacao)]
+pecasOrientadas (p,o) (x,y) t = pecasOrientadasAux (p,o)((x,y),o) 
+                                                   (x,y)   t   []
+
+pecasOrientadasAux :: (Peca,Orientacao) -> (Posicao,Orientacao)
+                   -> Posicao -> Tabuleiro
+                   -> [(Peca,Orientacao)] -> [(Peca,Orientacao)]
+                  
+  \end{verbatim}
+  
+  \newpage
+
+  \par \noindent Posto isto, segue-se uma explicação do que faz a função \textit{pecasOrientadasAux}. Esta função usa o par peca/orientação e a posição dada pelos argumentos (que pode ser considerada como a posição atual) para determinar a próxima posição. De seguida, compara esta última com a posiçao recebida pelo par posição/orientação que aparece nos argumentos (pode ser considerada como a posição onde o percurso acaba - a posição inicial). Também compara a orientação da próxima peça com a que é esperada que o carro tenha no final do percurso (\textit{Este}). Se a posição seguinte for a posição final e a orientação for igual também, então podemos afirmar que chegamos ao fim da pista. Caso contrário, o percurso ainda não acabou. Agora, sabendo isto, a função vai realizar o próximo passo: se tivermos chegado ao fim do percurso, então somamos a posição atual à lista de pares peça/orientação dada nos argumentos e devolvê-mo-la como resultado da função; caso contrário, invocamos novamente a função, mas, desta vez, iremos alterar alguns dos seus argumentos, tal que:
+
+  \begin{itemize}
+    
+  \item o par peça/orientação é atualizado, sendo que a peça passa a ser a próxima do percurso (usando a posição atual, determina-se a próxima posição, e, depois, usando a função \textit{pegaPeca} e o tabuleiro dado nos argumentos, determina-se qual a peça que está na próxima posição) e a orientação é alterada, caso a peça atual seja uma curva;
+  \item o par posição/orientação mantém-se inalterado, uma vez que este representa a posição e a orientação final;
+  \item a posição é alterada, de forma a que passe a ser a próxima posição do percurso;
+  \item o tabuleiro mantém-se inalterado;
+  \item à lista de pares peça/orientação é somado, no fim da lista, o par 
+  
+  peça/orientação recebido inicialmente.
+    
+  \end{itemize}
+
+  \newpage
+    
+  \par \noindent Voltando agora à validação, chega-se à primeira das duas situações para as quais a função \textit{pecasOrientadas} foi especialmente definida. Esta função recebe uma lista de pares peça/orientação e verifica se a altura do percurso é sempre compatível. Para tal, ela irá comparar a altura da peça na cabeça da lista com a altura da peça imediatamente a seguir. Se forem compatíveis, ela irá retirar a cabeça da lista, guardá-la num acumulador, com a ajuda de uma função auxiliar, continuar recursivamente com a nova lista, e assim sucessivamente até que ou só reste uma peça na lista original ou as alturas não sejam compatíveis. No primeiro caso, a função comparará a peça que fica na lista com a cabeça da lista do acumulador, uma vez que é suposto estas serem a última e a primeira peças, respetivamente, do percurso e, por isso, têm de coincidir. Caso as alturas sejam iguais, a função dir-nos-á que o caminho é verdadeiro segundo este aspeto. Se alguma vez as alturas não forem compatíveis, o percurso será imediatamente dado com inapropriado.
+
+  \begin{verbatim}
+    
+    alturas :: [(Peca,Orientacao)] -> Bool
+    alturas [] = False
+    alturas x  = alturasAux [] x
+    
+    alturasAux::[(Peca,Orientacao)]-> [(Peca,Orientacao)] -> Bool
+    
+  \end{verbatim}
+
+  \par \noindent Por fim, programou-se uma função à qual também é dada uma lista de pares peça/orientação, sendo que esta determina se duas peças consecutivas são ou não compatíveis, ou seja, a função irá determinar se o tipo e a orientação da primeira peça da lista são compatíveis com o tipo e a orientação da segunda peça da lista. Em caso afirmativo, a cabeça da lista será retirada e a função será aplicada à nova lista, e assim sucessivamente. Caso contrário, o percurso será dado como impróprio e, por conseguinte, falso.
+
+  \begin{verbatim}
+    
+    proxima :: [(Peca,Orientacao)] -> Bool
+    
+  \end{verbatim}
+  
+  \newpage
+
+  \par \noindent Depois de tudo isto, a função \textit{valida} está definida da seguinte forma:
+
+  \begin{verbatim}
+
+    valida (Mapa ((x,y),o) (z:zs)) = 
+                    if (verRetangular (Mapa ((x,y),o) (z:zs)))
+                      && (verLinhas (Mapa((x,y),o) (z:zs)))
+                      && (verColunas (Mapa ((x,y),o) (z:zs)))
+                      && (verPeca (Mapa ((x,y),o) (z:zs)))
+                      && (altLavaNula (Mapa ((x,y),o) (z:zs)))
+                      && (alturas k)
+                      && (proxima k) then True
+                    else False
+    where k = pecasOrientadas ((pegaPeca (x,y) (z:zs)),o) 
+                              (x,y) (z:zs)
+
+  \end{verbatim}
+
+  Deste modo, a nossa função fica definida de forma a que o mapa tenha de atravessar uma série de testes para comprovar se é ou não um mapa válido.
+  
+  \newpage
+
+  \section{Tarefa 3}
+
+  \par \noindent Com intuíto de resolver os problemas levantados na Tarefa 3, comecou por se definir uma função que viria a tornar-se bastante útil, não só nesta tarefa, como nas seguintes. Esta função recebe um tabuleiro e um carro e, através da posição atual do carro, determina-nos a peça em que o carro está.
+
+  \begin{verbatim}
+    
+    sacarPeca :: Tabuleiro -> Carro -> Peca
+    
+  \end{verbatim}
+
+  \par \noindent De seguida, procedeu-se à criação de um função que, dando um intervalo de tempo e um carro, atualiza a posição do carro, tendo por base o tempo decorrido e o vetor velocidade associado ao carro. Em termos práticos, a função converte o vetor velocidade num vetor polar e multiplica a sua norma pelo intervalo de tempo decorrido, mantendo o seu ângulo inalterado, de modo a obter o vetor da força resultante no intervalo de tempo em que foi aplicada. Após isto, aplica o vetor (agora sob a forma de vetor cartesiano) na posição atual do carro, de modo a obter a próxima posição do mesmo. Por fim, dá-nos um carro, em que o vetor velocidade e a direção se mantiveram inalterados, mas a posição foi atualizada.
+
+  \begin{verbatim}
+    
+    novoCarro :: Tempo -> Carro -> Carro
+    
+  \end{verbatim}
+
+  \par \noindent Numa fase posterior, foi programada uma função que, ao receber duas peças, nos diz se a segunda é uma lava e se esta está a uma altura igual ou inferior à da primeira peça (se estiver em altura superior, o carro irá embater com a peça em vez de morrer). Em caso afirmativo, a função diz-nos que a condição é verdadeira, e ficamos a saber que a próxima posição do carro é numa peça de lava. Em caso negativo, diz-nos que a condição é falsa, ou seja, o carro não transita para uma peça de lava. 
+
+  \begin{verbatim}
+    
+    verLava :: Peca -> Peca -> Bool
+    
+  \end{verbatim}
+
+  \par \noindent Prosseguindo no desenvolvimento da tarefa, decidiu-se criar uma função que compara a altura e o tipo de duas peças, de modo a determinar se o carro consegue sobreviver à transição da primeira para a segunda peça, ou se, ao transitar de uma para a outra, cai.
+
+  \begin{verbatim}
+    
+    verAlturaQueda :: Peca -> Peca -> Bool
+    
+  \end{verbatim}
+  
+  \newpage
+
+  \par \noindent Por último, foi gerada uma função à qual são dadas duas peças, um intervalo de tempo e um carro, sendo esta capaz de devolver um carro ou um "carro morto" (neste caso, irá devolver sempre um carro, uma vez que as situações que poderão levar à destruição do carro foram definidas noutras funções). Esta função verifica o que acontece quando um carro transita da primeira para a segunda peça. Nesta situação concreta, verifica se o carro embate com uma peça de altura superior ou se apenas transita para uma peça de altura compatível. Independentemente do resultado, ele irá aplicar a função \textit{novoCarro} de modo a obter o carro final. No entanto, enquanto que no caso em que não há colisão ela aplica a função normalmente ao carro recebido nos argumentos, no caso de haver colisão, a função irá ser aplicada a um carro alterado, que é fruto de uma variação na direção do carro original (uma vez que este carro bateu contra uma parede e está a fazer ricochete, o novo vetor velocidade terá sentido oposto ao do vetor velocidade original, ou seja, o vetor velocidade passa de (x,y) para (-x,-y)).
+
+  \begin{verbatim}
+      
+    verCarroFinal:: Peca -> Peca -> Tempo -> Carro -> Maybe Carro
+    
+  \end{verbatim}
+
+  \par Tendo por base estas funções, a resolução para a Tarefa 3 foi definida da seguinte maneira:
+
+  \begin{verbatim}
+    
+movimenta :: Tabuleiro -> Tempo -> Carro -> Maybe Carro
+movimenta m t c 
+   
+   |(verLava (sacarPeca m c) (sacarPeca m (novoCarro t c)))
+                                           ==True = Nothing 
+   
+   |(verAlturaQueda (sacarPeca m c)(sacarPeca m (novoCarro t c)))
+                                                ==False = Nothing
+   
+   |otherwise = verCarroFinal (sacarPeca m c) 
+                              (sacarPeca m (novoCarro t c)) 
+                              t 
+                              c 
+	            
+  \end{verbatim}
+
+  \par Assim, a função irá começar por determinar se o carro, devido ao seu movimento, acabará numa \textit{Peca Lava 0}. Se este cenário for verídico, então o carro é logo "morto", fazendo com que a função nos retribua um \textit{Nothing}. Caso tal não aconteça, determinar-se-á se o carro irá cair numa peça com altura inferior. Caso tal se confirme, então a função deverá devolver-nos, também, um \textit{Nothing}. Se realmente o movimento do carro permitir que este sobreviva, então a função dar-nos-á um \textit{Just Carro}, sendo que este irá ter a sua posição atualizada, consoante o estado da sua velocidade.
+  
+  \section{Tarefa 4}
+  
+  \par \noindent Tendo em vista a resolução da Tarefa 4, decidiu-se que cada uma das ações seria tida em conta individualmente, de modo a que houvesse, para cada uma delas, uma função própria, encarregue de atualizar o estado do jogo, caso a ação estivesse a decorrer. 
+  
+  \hspace{1cm}
+  
+  \par \noindent Deste modo, concebeu-se uma função que, recebendo um intervalo de tempo, o estado de um jogo, o identificador de um jogador e as ações tomadas por este, verifica se o carro deve acelerar e, em caso afirmativo, soma ao vetor velocidade do carro do jogador um vetor que o fará acelerar (vetor com direção igual à direção do carro e cuja norma será dada por: ac*t, em que "ac" é o valor da constante de aceleração e "t" o intervalo de tempo decorrido), devolvendo um jogo em que a única alteração será o vetor velocidade do carro do jogador. No caso de o carro não estar a acelerar, o estado do jogo não se altera. 
+  
+  \begin{verbatim}
+      
+    vamosAcelerar :: Tempo -> Jogo -> Int -> Acao -> Jogo
+      
+  \end{verbatim}
+
+  \par \noindent Em seguida, programou-se uma função que, obtendo o mesmo tipo de argumentos que a anterior, determina se o jogador tenciona que o carro trave, somando ao vetor velocidade do seu carro um vetor que abrande o seu movimento [vetor com direção oposta à direção do carro e cuja norma seria dada por: tr*t, em que "ac" é o valor da constante de travagem (considera-se a mesma que a de aceleração) e "t" o intervalo de tempo decorrido]. Novamente, só ocorrerão mudanças no vetor velocidade do carro do jogador, e apenas se este quiser travar. Caso contrário, o jogo manter-se-á inalterado.
+
+  \begin{verbatim}
+
+    vamosTravar :: Tempo -> Jogo -> Int -> Acao -> Jogo
+
+  \end{verbatim}
+
+  \par \noindent Após isto, e mantendo o tipo argumentos das funções anteriores, definiu-se uma função que determina se o nitro irá ser ligado em algum dos carros e, se sim, em qual deles, de forma a modificar o seu vetor velocidade, somando-lhe o vetor da aceleração provocada pelo nitro (vetor com direção igual à direção do carro e cuja norma seria dada por: ni*t, em que "ni" é o valor da constante de aceleração provocada pelo nitro e "t" o intervalo de tempo decorrido). Deste modo, a função devolve um jogo atualizado, em que o vetor velocidade do carro pretendido foi alterado. Em caso de não se objetivar alterar a velocidade de nenhum carro, o jogo é devolvido, sem alterações.
+  
+  \begin{verbatim}
+      
+    vamosLigarNitro :: Tempo -> Jogo -> Int -> Acao -> Jogo   
+      
+  \end{verbatim}
+  
+  \newpage
+  
+  \par \noindent Ulteriormente, programaram-se duas funções que, recebendo o mesmo tipo de argumentos que as outras, farão com que um carro que queira virar à esquerda ou à direita altere a sua direção consoante a ação tomada (no caso de estar a virar à esquerda, somar-se-á, ao valor da sua direção, (ro*t) graus; no caso de estar a virar à direita, subtrair-se-á, ao valor da sua direção, (ro*t) graus - em ambos os casos, "ro" representa o valor da constante de rotação). Assim sendo, obtemos um jogo alterado, em que a diferença reside na direção do carro do jogador (caso o jogador queira que o carro vire em alguma direção); caso contrário, obtemos o jogo dado. 
+  
+  \begin{verbatim}
+      
+    vamosVirarEsq :: Tempo -> Jogo -> Int -> Acao -> Jogo
+       -- função que vira à esquerda
+    
+    vamosVirarDir :: Tempo -> Jogo -> Int -> Acao -> Jogo
+       -- função que vira à direita
+        
+  \end{verbatim}
+  
+  \par \noindent A seguir, gerou-se uma função que recebe como argumentos uma peça (considera -se a peça em que o carro está), um intervalo de tempo, o estado do jogo e o identificador do jogador, de modo a poder devolver um estado do jogo atualizado. Neste caso, a função atuará sempre que a peça dada for uma rampa; caso contrário, devolve-se o jogo inalterado. Se a função atuar, então esta somará ao vetor velocidade o vetor da força exercida pelo peso do carro, uma vez que, em rampas, esta é notória (o valor do módulo do vetor será dado pela expressão pe*t, em que "pe" é o valor da constante do peso e "t" o intervalo de tempo decorrido; já o ângulo do vetor irá variar com o tipo de rampa: se for uma \textit{Rampa Este}, então o ângulo será $\pi$; se for uma \textit{Rampa Oeste}, então o ângulo será 0; se for uma \textit{Rampa Norte}, então o ângulo será (3*$\pi$)/2; se for uma \textit{Rampa Sul}, então o ângulo será $\pi$/2)).
+  
+  \begin{verbatim}
+      
+    vamosPeso :: Peca -> Tempo -> Jogo -> Int -> Jogo
+      
+  \end{verbatim}
+  
+  \newpage
+  
+  \par \noindent Finalmente, criou-se uma função que recebe um intervalo de tempo, um estado do jogo e o identificador do jogador, de modo a aplicar todas as constantes a que um carro está sujeito, quando em movimento, ou seja, esta função irá aplicar ao carro as forças exercidas pelo atrito, tanto do chão como dos pneus. Por outras palavras, ela irá somar ao vetor velocidade do carro o vetor da força do atrito do chão (direção oposta à do vetor velocidade e norma dada por at*t*d, em que "at" é o valor da constante de atrito do chão, "t" é o intervalo de tempo decorrido e "d" é a norma do vetor velocidade do carro) e o vetor da força de atrito dos pneus (vetor perpendicular à direção do carro, no sentido oposto à velocidade, e cuja norma é dada por: (sin e)*pn*d, em que "e" é o módulo da diferença entre a direção do carro e a direção do vetor velocidade, "pn" é o valor da constante de atrito dos pneus e "d" é o módulo do vetor velocidade do carro).
+  
+  \begin{verbatim}
+      
+    vamosCons :: Tempo -> Jogo -> Int -> Jogo
+      
+  \end{verbatim}
+  
+  \par \noindent Como modo de auxílio, definiram-se duas funções. A primeira, dada uma lista de carros e um identificador, devolve-nos o carro a que corresponde. A segunda, dado o estado de um jogo e o identificador de um jogador, dá-nos a peça em que o carro desse jogador está.
+  
+  \begin{verbatim}
+      
+    buscaCarro :: [Carro] -> Int -> Carro
+      
+    verRampa :: Jogo -> Int -> Peca
+    verRampa (Jogo (Mapa a t) p c n h) x 
+                    = sacarPeca t (buscaCarro c x)
+      
+  \end{verbatim}
+  
+  \par \noindent Posto isto, a solução proposta para a Tarefa 4 é a seguinte:
+  
+  \begin{verbatim}
+      
+    atualiza t e j a 
+    = vamosPeso p t (vamosCons t 
+                        (vamosLigarNitro t 
+                            (vamosVirarDir t 
+                                (vamosVirarEsq t 
+                                    (vamosTravar t 
+                                        (vamosAcelerar t e j a) 
+                                j a) j a) j a) j a) j) j 
+         
+           where p = verRampa e j
+      
+  \end{verbatim}
+  
+  \newpage
+  
+  \par \noindent De modo sumário, esta função começa por atualizar o estado do jogo usando a função \textit{vamosAcelerar} (caso o carro esteja a acelerar, atualiza o vetor velocidade do carro em questão; caso contrário, devolve o jogo inalterado). De seguida, usando o mesmo intervalo de tempo, o mesmo identificador, o mesmo leque de ações e o estado do jogo inicial, atualizado segundo a função anterior, aplica a função \textit{vamosTravar} (caso o carro esteja a travar, atualiza o vetor velocidade do carro em questão; caso contrário, devolve o jogo inalterado). Esta mesma lógica aplica-se às funções \textit{vamosVirarEsq}, \textit{vamosVirarDir}, \textit{vamosLigarNitro} e \textit{vamosCons}, por esta ordem, de modo a que, no final, tenhamos um jogo em que o carro do jogador em questão (dado pelo identificador "j") esteja modificado consoante as ações tomadas pelo jogador.
+  
+  \newpage
+  
+  \section{Tarefa 5}
+  
+  \par \noindent De forma a contemplar os objetivos estabelecidos para a Tarefa 5, inicialmente definiu-se uma função que, recebendo um intervalo de tempo, o estado de um jogo, o identificador de um jogador e uma lista de ações, aplica a função \textit{atualiza} (Tarefa 4) a todos os jogadores (o número de jogadores considerado equivale ao comprimento da lista de ações dada).
+  
+  \begin{verbatim}
+      
+    jogoAct :: Tempo -> Jogo -> Int -> [Acao] -> Jogo  
+      
+  \end{verbatim}
+  
+  \par \noindent Após isto, criou-se uma função que, recebendo um intervalo de tempo e um jogo, aplica a função \textit{movimenta} (Tarefa 3) a todos os carros (considera-se a lista de carros fornecida pelo jogo), devolvendo, no final, uma lista com "carros vivos" e "carros mortos" (\textit{[Maybe Carro]}).
+  
+  \begin{verbatim}
+      
+    carrosAct :: Tempo -> Jogo -> [Maybe Carro]
+      
+  \end{verbatim}
+  
+  \par \noindent Depois, programou-se uma função que, recebendo dois estados de jogo e uma lista com "carros vivos" e "carros mortos", devolve-nos um jogo atualizado, ou seja, a função devolve um jogo em que o mapa, as propriedades, a lista de nitros e o histórico são em tudo similares aos do segundo jogo (pode considerar-se como sendo o jogo mais recente), mas modifica a lista de carros do jogo, tendo em conta a lista de \textit{Maybe Carro}'s e a lista de carros do primeiro jogo (este será, mais à frente, considerado como o estado do jogo antes de ser atualizado). Para esta modificação, procedeu-se da seguinte forma:
+  
+  \begin{itemize}
+      
+      \item caso o primeiro carro de \textit{[Maybe Carro]} seja um \textit{Nothing}, devolver-se-á o primeiro carro da lista de carros normal;
+      
+      \item caso o primeiro carro de \textit{[Maybe Carro]} seja um \textit{Just Carro}, devolver-se-á apenas \textit{Carro}
+      
+  \end{itemize}
+  
+  \par \noindent Para ambos os casos, a função será aplicada recursivamente, descartando, em ambas as listas, o primeiro elemento.
+  
+  \begin{verbatim}
+      
+    novoJogo :: Jogo -> Jogo -> [Maybe Carro] -> Jogo  
+      
+  \end{verbatim}
+  
+  \newpage
+  
+  \par \noindent De modo a cumprir um dos objetivos principais desta tarefa, definiu-se a seguinte função:
+  
+  \begin{verbatim}
+    
+    atualizaMovimenta :: Tempo -> Jogo -> [Acao] -> Jogo
+    atualizaMovimenta t j (a:as) 
+              = novoJogo j (jogoAct t j 0 (a:as)) 
+                         (carrosAct t (jogoAct t j 0 (a:as)))
+    
+  \end{verbatim}
+  
+  \par \noindent Assim, a função irá construir um novo estado do jogo, atualizado segundo a lista de ações, e uma lista de "carros vivos" e "carros mortos" que, juntamente com o estado do jogo inicial, serão usados para criar o estado do jogo final.
+  
+  \par \noindent Tendo, agora, em vista a execução da segunda parte da tarefa (criação da parte gráfica do jogo e respetivas interações/reações deste a comandos do teclado), começou por se definir o que seria o \textit{Estado} de um jogo.
+  
+  \begin{verbatim}
+      
+    type Estado = (Jogo,[Acao],[Picture]) 
+      
+  \end{verbatim}
+  
+  \par \noindent Nisto, convém realçar que:
+  
+  \begin{itemize}
+      
+      \item \textit{[Acao]} será uma lista ordenada de ações, as quais corresponderão apenas a um jogador (o primeiro elemento da lista ao primeiro jogador, o segundo ao segundo, e assim sucessivamente);
+      
+      \item \textit{[Picture]} será uma lista em que a ordem pela qual os elementos aparecem será fulcral, uma vez que, mais tarde, cada um dos elementos será associado a uma peça do jogo diferente.
+      
+  \end{itemize}
+  
+  \par \noindent Começou por se definir uma função que, recebendo uma lista de \textit{Maybe Picture}, devolve-nos a lista de \textit{Picture} correspondente.
+  
+  \begin{verbatim}
+      
+    toPicture :: [Maybe Picture] -> [Picture]
+      
+  \end{verbatim}
+  
+  \newpage
+  
+  \par \noindent De seguinda, criou-se o estado inicial do jogo:
+  
+  \begin{verbatim}
+      
+    estadoInicial :: [Picture] ->  Estado
+    estadoInicial p 
+        = (j,
+           [(Acao False False False False Nothing),
+            (Acao False False False False Nothing),
+            (bot (1/(fromIntegral fr)) j 2)],
+           p)
+           
+         where j = (Jogo (constroi c) 
+                         pr 
+                         [(Carro (detPos1 (partida c)) 0 (0,0)),
+                          (Carro (detPos2 (partida c)) 0 (0,0)),
+                          (Carro (detPos3 (partida c)) 0 (0,0))] 
+                         [5,5,5] 
+                         [[],[],[]])
+                         
+               pr = Propriedades 1.5 2 4 3 15 90
+                         
+    -- "bot" é a função definida na Tarefa 6, 
+       que mais tarde será explicada
+                         
+  \end{verbatim}
+  
+  \par \noindent Convém frisar que:
+  
+  \begin{itemize}
+  
+      \item como se pode observar, o jogo será jogado por dois jogadores e um \textit{bot};
+      
+      \item "c" é um caminho qualquer;
+      
+      \item as funções "\textit{detPos}" definem as posições iniciais dos carros.
+      
+  \end{itemize}
+  
+  \par \noindent 
+  
+  \newpage 
+  
+  \par \noindent Após isto, definiu-se o modo como o jogo seria representado.
+  
+  \begin{verbatim}
+      
+    desenhaEstado :: Estado -> Picture
+    desenhaEstado ((Jogo (Mapa a t) pr c n h), ac, p) 
+              = atualizaCar c (atualizaMap t p 0) p
+  
+  \end{verbatim}
+  
+  \par \noindent Neste caso, o jogo será construído em duas partes: primeiro, será desenhado o mapa de jogo e, depois, serão colocados os carros no mapa. Para isto definiram-se duas funções: \textit{atualizaMap} e \textit{atualizaCar}.
+  
+  \hspace{1cm}
+  
+  \par \noindent A função \textit{atualizaMap} recebe um tabuleiro de jogo, uma lista de figuras e um \textit{Float}, e devolverá uma lista de figuras. A função está definida de forma a que, a cada uma das diferentes peças de tabuleiro existentes, associe uma só figura da lista (aqui se revela a importãncia da ordem das figuras, uma vez que a função associa a cada peça uma figura numa dada ordem da lista) e a desloque para a posição pretendida (o \textit{Float} dado é relativo á linha da peça, sendo que será usada uma auxiliar que irá determinar a coluna da peça).
+  
+  \begin{verbatim}
+      
+    atualizaMap :: Tabuleiro -> [Picture] -> Float ->  [Picture]  
+      
+  \end{verbatim}
+  
+  \par \noindent A função \textit{atualizaCar} recebe uma lista de carros, duas listas de figuras e devolverá uma só figura. Esta função irá associar cada carro a uma imagem (dada pela segunda lista de figuras), de modo a que cada jogador consiga identificar o seu carro e colocá-lo na sua posição. Por fim, ela juntará a primeira lista de figuras com outra, detentora das imagens dos carros, e tirará partido da função \textit{Pictures} do \textit{Gloss}, de modo a criar uma só figura.
+  
+  \begin{verbatim}
+      
+    atualizaCar :: [Carro] -> [Picture] -> [Picture] -> Picture  
+      
+  \end{verbatim}
+  
+  \newpage
+  
+  \par \noindent Dado isto, determinaram-se as teclas de um teclado que fariam o jogo reagir. Para isso, definiu-se uma função que, dado um evento e um estado, devolveria um estado atualizado. 
+  
+  \begin{verbatim}
+      
+    reageEvento :: Event -> Estado -> Estado  
+      
+  \end{verbatim}
+  
+  \par \noindent Uma vez que o jogo foi desenhado de modo a que duas pessoas pudessem usufruir deste, foi necessário programar dois conjuntos de comandos diferentes, de modo a que cada um apenas interfira num carro. Assim sendo, é salientar que:
+  
+  \begin{itemize}
+      
+      \item as teclas \textit{"KeyUp"}, \textit{"KeyDown"}, \textit{"KeyLeft"} e \textit{"KeyRight"} fazem com que o 1º carro acelere, trave, vire à esquerda e vire à direita, respetivamente;
+      
+      \item as teclas \textit{"s"}, \textit{"x"}, \textit{"z"} e \textit{"c"} fazem com que o 2º carro acelere, trave, vire à esquerda e vire à direita, respetivamente;
+      
+      \item as teclas \textit{"u"}, \textit{"i"}, \textit{"o"} e \textit{"p"} fazem com que o 1ºjogador ative o nitro no 1º, 2º, 3º e 4º carros, respetivamente;
+      
+      \item as teclas \textit{"q"}, \textit{"w"}, \textit{"e"} e \textit{"r"} fazem com que o 2ºjogador ative o nitro no 1º, 2º, 3º e 4º carros, respetivamente;
+      
+  \end{itemize}
+  
+  \par \noindent Referido isto, deve-se dizer que cada um dos eventos reage diretamente com cada uma das ações da \textit{[Acao]} fornecida pelo nosso \textit{Estado}. Ou seja, as teclas associadas ao 1ºjogador apenas interferirão com a primeira ação e as teclas referentes ao 2ºjogador apenas interferirão com a segunda ação. Posto isto, segue o que acontece quando são pressionada as teclas \textit{"KeyUp"} e \textit{"q"}:
+  
+  \begin{verbatim}
+      
+    reageEvento (EventKey (SpecialKey KeyUp) Down _ _) 
+                (j,((Acao a b c d e):xs),p) 
+        = (j,((Acao True b c d e):xs),p) 
+        
+    reageEvento (EventKey (Char 'q') Down _ _) 
+                (j,(x:(Acao a b c d e):xs),p) 
+        = (j,(x:(Acao a b c d (Just 0)):xs),p)
+      
+  \end{verbatim}
+  
+  \newpage
+  
+  \par \noindent Por último, foi programada uma função que, dado um intervalo de tempo, atualiza o nosso estado do jogo usando a função \textit{atualizaMovimenta} (como argumentos, esta função irá receber o intervalo de tempo, o jogo e uma lista de ações, estes últimos fornecidos pelo nosso \textit{Estado}).
+  
+  \begin{verbatim}
+    
+    reageTempo :: Float -> Estado -> Estado 
+    reageTempo n (j,a,p) 
+           = ((atualizaMovimenta (float2Double n) j a),a,p)
+
+  \end{verbatim}
+  
+  \par \noindent Deste modo, torna-se possível concluir a segunda parte da nossa tarefa, definindo a seguinte função:
+  
+  \begin{verbatim}
+      
+    main :: IO ()
+    main = do 
+           p <- loadJuicy "barco1.bmp"
+           play FullScreen 
+                white 
+                fr 
+                (estadoInicial (toPicture [p])) 
+                desenhaEstado 
+                reageEvento 
+                reageTempo
+                
+    fr :: Int 
+    fr = 100
+    
+    -- considera-se "p" como representante de todas as
+       imagens necessárias 
+             
+      
+  \end{verbatim}
+  
+  \newpage
+  
+  \section{Tarefa 6}
+  
+  \par \noindent Para se concluir esta tarefa e, consequentemente, o projeto, começou por se definir uma função que, fornecendo-lhe um jogo, devolveria uma lista de pares peça/orientação. Para isto, utilizou-se a função \textit{pecasOrientadas}, definida anteriormente.
+  
+  \begin{verbatim}
+      
+    todasPecas :: Jogo -> [(Peca,Orientacao)]
+    todasPecas (Jogo m p c n h) = defLPeca m
+    
+    defLPeca :: Mapa -> [(Peca,Orientacao)]
+    defLPeca (Mapa ((x,y),o) (z:zs)) 
+      = pecasOrientadas ((pegaPeca (x,y) (z:zs)),o) (x,y) (z:zs)
+  
+      
+  \end{verbatim}
+  
+  \par \noindent Posteriormente, definiu-se uma função que, ao receber um jogo, devolveria a posição inicial deste.
+  
+  \begin{verbatim}
+      
+    posInit :: Jogo -> Posicao  
+      
+  \end{verbatim}
+  
+  \par \noindent A seguir a isto, definiu-se uma função que, dada uma posição, um lista de pares peça/orientação e uma lista de tuplos peça/orientação/posição gera  uma lista de tuplos peça/orientação/posição. Para tal, a lista começa por verificar o primeiro par peça/orientação da lista, de modo a prever qual será a a pŕoxima posição. Posto isto, a função é usada recursivamente, recebendo novos argumentos: a posição será a prevista pela função com sendo a próxima; a lista de pares peça/orientação não terá a cabeça; e, por fim, à lista de tuplos peça/orientação/posição será somado um novo tuplo que consistirá na anterior cabeça da lista de pares peça/orientação com a posição inicialmente recebida. No final, quando a lista de pares peça/orientação estiver vazia, a função devolve a lista de tuplos peça/orientação/posição.
+  
+  \begin{verbatim}
+      
+    detPos :: Posicao -> [(Peca,Orientacao)]
+           -> [(Peca,Orientacao,Posicao)] 
+           -> [(Peca,Orientacao,Posicao)]  
+      
+  \end{verbatim}
+  
+  \newpage
+  
+  \par \noindent Seguida desta foram definidas duas funções que, dado um jogo, devolvem o tabuleiro e a lista de carros deste, respetivamente.
+  
+  \begin{verbatim}
+      
+    cars :: Jogo -> [Carro]
+
+    tab :: Jogo -> Tabuleiro
+      
+  \end{verbatim}
+  
+  \par \noindent Depois, definiu-se uma função que, dada uma lista de carros e o identificador de um jogador, descobre qual a posição da peça em que o carro está atualmente.
+  
+  \begin{verbatim}
+      
+    pPos :: [Carro] -> Int -> Posicao  
+      
+  \end{verbatim}
+  
+  \par \noindent Posto isto, definiu-se uma função que, ao receber uma posição de uma peça e uma lista de tuplos peça/orientação/posição, compara a posição dada com a posição da cabeça do tuplo. Se for a mesma, a função devolve o par peça/ orientação correspondente; caso contrário, a função é usada recursivamente na cauda da lista, até obter uma correspondência. 
+  
+  \begin{verbatim}
+      
+    pegaPar :: Posicao -> [(Peca,Orientacao,Posicao)]
+            -> (Peca,Orientacao)  
+      
+  \end{verbatim}
+  
+  \par  \noindent Após isto, criou-se uma função que transforma a direção de um carro num ângulo positivo, caso esta não o seja.
+  
+  \begin{verbatim}
+      
+    transformaDir :: Carro -> Carro  
+      
+  \end{verbatim}
+  
+  \par \noindent De seguida, programou-se uma função que, dado um carro, um par peça/orientação e uma ação, devolve a melhor ação a ser tomada. Ou seja, a função irá analisar o tipo de peça em que o carro está e a sua orientação, comparando-as com a direção do carro, de modo a determinar qual a melhor decisão a tomar.
+  
+  \begin{verbatim}
+      
+    detAcao :: Carro -> (Peca,Orientacao) -> Acao -> Acao  
+      
+  \end{verbatim}
+  
+  \newpage
+  
+  \par \noindent Após esta, foi definida mais uma função que, dada uma lista de carros, cria uma lista com as posições das peças em que cada carro está.
+  
+  \begin{verbatim}
+      
+    convertePos :: [Carro] -> [Posicao]
+    convertePos [] = []
+    convertePos (c:cs) = (pPos2 c):(convertePos cs)  
+      
+  \end{verbatim}
+  
+  \par \noindent Depois desta, definiu-se uma função que, recebendo uma lista de posições e um tabuleiro, devolve a lista das peças correspondentes.
+  
+  \begin{verbatim}
+      
+    convertePeca :: [Posicao] -> Tabuleiro -> [Peca]
+    convertePeca [] t = []
+    convertePeca (p:ps) t = (pegaPeca p t):(convertePeca ps t)  
+      
+  \end{verbatim}
+  
+  \par \noindent Por último, definiu-se uma função que recebe dois identificadores de jogador, uma lista de peças e uma ação, e devolve uma ação nova. Por outras palavras, a função verifica se a cabeça da lista é uma peça do tipo \textit{Curva}. Se não o for, então continua a função recursivamente, somando +1 ao segundo identificador e descartando a cabeça da lista. Caso seja uma curva, a função verifica se o primeiro identificador (nº do \textit{bot}) é igual ao segundo identificador (nº do jogador na peça dada pela cabeça da lista). Se forem iguais, a função continua recursivamente, somando +1 ao segundo identificador e descartando a cabeça da lista; se não forem, a função irá mudar a ação, de modo a que aplique o nitro no jogador definido pelo segundo identificador.
+  
+  \begin{verbatim}
+      
+    lNitro :: Int -> Int -> [Peca] -> Acao -> Acao  
+      
+  \end{verbatim}
+  
+  \par \noindent Posto isto, o nosso \textit{bot} fica definido da seguinte forma:
+  
+  \begin{verbatim}
+      
+    bot t j i
+      = lNitro i 0 (convertePeca (convertePos (cars j)) (tab j))
+                   (detAcao 
+                        (transformaDir (buscaCarro (cars j) i))
+                        (pegaPar 
+                            (pPos (cars j) i) 
+                            (detPos (posInit j) 
+                            (todasPecas j) []))
+                        (Acao False False False False Nothing))  
+      
+  \end{verbatim}
+  
+  \par \noindent Assim, ele começa por tomar uma decisão em relação àquilo que deve fazer para continuar o seu percurso e, depois, irá verificar se deve ligar o nitro em algum dos seus oponentes, de modo a prejudicá-lo.
+
+
+
+
+
+% Como foi validada a implementação da solução
+\chapter{Validação da Solução}
+
+\par \noindent O principal meio de verificação das tarefas foi, sem dúvida alguma, o \textit{Sistema de FeedBack} disponibilizada, uma vez que este dava bastante informação sobre a utilização das nossas funções, aquando da aplicação dos testes por nós definidos, e, também, indicava quando os resultados não eram os previstos. Para além disto, é de realçar que também se torna bastante útil usar o terminal para verificar se certas funções mais simples estão a funcionar como pretendido.
+
+\par \noindent Posto isto, será feita uma breve descrição dos diferentes testes submetidos, para cada uma das tarefas.
+
+\begin{itemize}
+    
+    \item Para a Tarefa 1, escreveram-se diversos caminhos diferentes que podem ser dividos em dois tipos principais: os que formavam circuitos fechados e, por isso, eram possíveis de ser percorridos; e os que formavam circuitos abertos, tornando-se impossíveis de completar. Em ambos os casos, a intenção era verificar se a função fornecido formava um mapa "válido" para qualquer caminho, ou seja, que apenas possuía um circuito, independetemente da natureza deste, que todas as peças fora do percurso eram lava e que as bordas do mapa eram apenas constituídas por lava.
+    
+    \item Para a Tarefa 2, desenvolveram-se diversos tabuleiros, com variáveis características. A intenção principal deste procedimento era confirmar se a tarefa estava, realmente, a excluir todos os tabuleiros que não forneciam mapas válidose, por outro lado, a validar os tabuleiros que criavam mapas possíveis. Para isto, os tabuleiros tanto eram completamente corretos, como poderiam ter pelo menos um erro (por exemplo, peças com alturas incompatíveis ou percursos impossíveis de se percorrer).
+    
+    \item Para a Tarefa 3, foram descritas uma série de situações com tabuleiros diferentes, intervalos de tempo diferentes e carros diferentes, de modo a que os resultados obtidos fossem, também, diferentes. Assim sendo, pretendia-se que os testes cobrissem todas as possibilidades possíveis - que o carro "morresse", ou por cair na lava, ou por transitar para uma peça mais baixa; ou que este visse a sua posição alterada, após uma colisão com uma parede, ou devido simplesmente ao seu movimento.
+    
+    \newpage
+    
+    \item Para a Tarefa 4, produziram-se tuplos com diferentes intervalos de tempo, estados do jogo e ações, de modo a verificar se a tarefa estaria a correr da forma que seria esperada, modificando o vetor velocidade do carro e a direção deste sempre que assim o fosse definido.
+    
+\end{itemize}
+
+
+
+
+
+\chapter{Conclusão}
+
+    \par \noindent De uma forma geral, pode-se afirmar que este projeto foi extremamente desafiante, pondo à prova a nossa capacidade criativa e as diferentes técnicas que fomos aprendendo, não só nesta Unidade Curricular mas também em Programação Funcional. Apesar de terem existido alguns momentos de um certo desânimo e frustração, logo eram superados pela satisfação da descoberta de novas soluções, torna-se algo prazeroso quando as coisas funcionam como se tenciona e se consegue passar para o computador as ideias que vão na nossa mente.
+    
+    \par \noindent Por outro lado, falando agora da minha situação concretamente, esta experiência de trabalho permitiu-me valorizar mais o trabalho em grupo, uma vez que, como desenvolvi o projeto sozinho (o meu colega de grupo deixou de aparecer às aulas depois da entrega da 1ªfase, sendo que o desenvolvimento desta também foi todo realizado por mim, uma vez que ele não tinha computador; entretanto, sempre que tentava entrar em contacto com ele, não obtinha resposta), debati-me com algumas adversidades que certos colegas meus não vivenciaram, tornando notória a relevância de se desenvolver este tipo de projetos em parceria com outras pessoas.
+
+
+
+
+
+\end{document}
